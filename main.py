@@ -4,12 +4,11 @@ import matplotlib.pyplot as plt
 import sympy as sp
 import pandas as pd
 from typing import Tuple, List
-import io
 
-# Set page configuration for a wider layout and custom title
+# Set page configuration
 st.set_page_config(page_title="Secant Method Solver", layout="wide")
 
-# Custom CSS for better styling
+# Custom CSS
 st.markdown("""
     <style>
     .main {background-color: #f5f5f5;}
@@ -39,10 +38,10 @@ def evaluate_function(expr: str, x: float) -> float:
         st.error(f"Error in expression: {e}")
         return None
 
-# Enhanced Secant Method Implementation
+# Secant Method Implementation
 def secant_method(expr: str, x0: float, x1: float, tol: float = 0.5) -> Tuple[float, List[float], List[float], str, List[dict]]:
     """
-    Implements the Secant Method with enhanced robustness and step tracking.
+    Implements the Secant Method with step tracking.
     
     Parameters:
     - expr: Mathematical expression as a string
@@ -51,7 +50,7 @@ def secant_method(expr: str, x0: float, x1: float, tol: float = 0.5) -> Tuple[fl
     
     Returns:
     - root: Approximated root
-    - x_values: List of x values during iterations
+    - x_values: List of x values
     - errors: List of absolute errors
     - message: Status message
     - steps: List of dictionaries with iteration details
@@ -96,8 +95,8 @@ def secant_method(expr: str, x0: float, x1: float, tol: float = 0.5) -> Tuple[fl
             "Formula": formula
         })
         
-        if error < tol or abs(f_x2) < tol:
-            return x2, x_values, errors, f"Converged after {iter_count + 1} iterations", steps
+        if error < tol:
+            return x2, x_values, errors, f"Converged after {iter_count + 1} iterations (absolute error < {tol})", steps
         
         x0, f_x0 = x1, f_x1
         x1, f_x1 = x2, f_x2
@@ -108,7 +107,7 @@ def secant_method(expr: str, x0: float, x1: float, tol: float = 0.5) -> Tuple[fl
 # Function to create visualization for a step
 def plot_step(expr: str, x_prev: float, x_curr: float, x_next: float, iteration: int, x_range: np.ndarray, 
               step_details: dict, plot_width: float, plot_height: float) -> plt.Figure:
-    """Creates a plot for a single Secant Method step with detailed annotations."""
+    """Creates a plot for a single Secant Method step."""
     fig, ax = plt.subplots(figsize=(plot_width, plot_height))
     
     # Plot the function
@@ -153,7 +152,7 @@ def plot_step(expr: str, x_prev: float, x_curr: float, x_next: float, iteration:
 # Streamlit App
 def main():
     st.title("Secant Method Solver")
-    st.markdown("A modern tool to find roots of functions using the Secant Method with interactive visualizations.")
+    st.markdown("A tool to find roots using the Secant Method with visualizations.")
 
     # Sidebar for Inputs
     with st.sidebar:
@@ -212,7 +211,7 @@ def main():
             # Solution Steps with Visualizations and Export
             with st.expander("Step-by-Step Solution", expanded=True):
                 st.markdown("### Solution Steps")
-                st.markdown("Below is the detailed process of the Secant Method, showing each iteration’s values, calculations, and visualizations:")
+                st.markdown("Detailed process of the Secant Method with calculations and visualizations:")
                 
                 # Create steps DataFrame
                 steps_df = pd.DataFrame(steps)
@@ -242,7 +241,7 @@ def main():
                 st.markdown("### Step Visualizations")
                 st.markdown("Select which iterations to visualize:")
                 iter_options = [f"Iteration {step['Iteration']}" for step in steps[2:]]  # Skip initial guesses
-                default_iters = iter_options  # Default to all iterations
+                default_iters = iter_options
                 selected_iters = st.multiselect(
                     "Select Iterations",
                     options=iter_options,
@@ -250,10 +249,10 @@ def main():
                     help="Choose which iteration steps to display visualizations for."
                 )
                 
-                # Generate visualizations for selected iterations
+                # Generate visualizations
                 if selected_iters:
                     x_range = np.linspace(min(x_values) - 1, max(x_values) + 1, 400)
-                    for step in steps[2:]:  # Start from iteration 2 (x2)
+                    for step in steps[2:]:
                         iter_num = step["Iteration"]
                         iter_label = f"Iteration {iter_num}"
                         if iter_label in selected_iters:
@@ -265,11 +264,11 @@ def main():
                             fig = plot_step(expr, x_n_minus_2, x_n_minus_1, x_n, iter_num, x_range, 
                                           step, plot_width, plot_height)
                             st.pyplot(fig)
-                            plt.close(fig)  # Close figure to free memory
+                            plt.close(fig)
                 else:
                     st.info("No iterations selected. Select iterations above to view visualizations.")
 
-            # Plots in Columns
+            # Plots
             col_plot1, col_plot2 = st.columns(2)
             with col_plot1:
                 st.subheader("Convergence Plot")
@@ -296,18 +295,18 @@ def main():
                 ax.legend()
                 st.pyplot(fig)
 
-            # Enhanced Explanation
+            # Explanation
             st.header("Explanation")
             st.markdown(f"""
-            The Secant Method approximates roots by iteratively drawing secant lines. Here's how it performed:
+            The Secant Method approximates roots using secant lines. Results:
 
             - **Function**: `f(x) = {expr}`
             - **Initial Guesses**: `x0 = {x0}`, `x1 = {x1}`
             - **Iterations**: Converged in **{len(errors)}** steps.
-            - **Convergence**: The error dropped below the tolerance (0.5) or the function value became negligible. The method's superlinear convergence (order ≈ 1.618) is evident in the steep error decline.
-            - **Root**: Found at **{root:.10f}**, where `f(x) ≈ 0`.
-            - **Insights**: Success depended on the guesses being close to the root and the function’s continuity. Poor guesses or high nonlinearity could slow convergence or cause failure.
-            - **Advantages**: No derivatives needed (unlike Newton’s method), but it may oscillate if the function flattens significantly.
+            - **Convergence**: Stopped when absolute error (|x_{{n+1}} - x_n|) was less than tolerance (0.5).
+            - **Root**: **{root:.10f}**, where `f(x) ≈ 0`.
+            - **Insights**: Success depends on guesses near the root and function continuity.
+            - **Advantages**: No derivatives needed, but may oscillate if function flattens.
             """)
 
     # Examples and Help
@@ -320,10 +319,10 @@ def main():
 
         ### Tips
         - Use Python syntax: `x**2` for x², `cos(x)` for cosine, etc.
-        - Ensure initial guesses bracket or are near the root for faster convergence.
-        - The tolerance is fixed at 0.5, controlling when the method stops based on error or function value.
-        - Use the plot size sliders to customize visualization dimensions.
-        - Select specific iterations to focus on key steps in the visualization section.
+        - Ensure initial guesses are near the root for faster convergence.
+        - Iterations stop automatically when absolute error is less than 0.5.
+        - Adjust plot sizes for better visualization.
+        - Select specific iterations to focus on steps.
         """)
 
 if __name__ == "__main__":
