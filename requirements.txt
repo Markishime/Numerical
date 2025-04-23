@@ -1,5 +1,8 @@
-streamlit==1.38.0
-numpy==1.26.4
-matplotlib==3.9.2
-sympy==1.13.3
-pandas==2.2.3
+flask
+numpy
+sympy
+langchain-google-genai
+python-dotenv
+streamlit
+matplotlib
+pandas
