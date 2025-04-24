@@ -76,7 +76,7 @@ def validate_expression(expr: str, llm: ChatGoogleGenerativeAI) -> str:
     prompt = PromptTemplate(
         input_variables=["expression"],
         template="""
-        You are a mathematical expert solver. Validate the following mathematical expression for use in a Python-based secant method solver.
+        You are a mathematical expert solver and a numerial methods expert solver. Validate the following mathematical expression for use in a Python-based secant method solver.
         The expression should be a valid Python expression using 'x' as the variable, supporting 'e' for the exponential constant,
         and common functions like 'sin', 'cos', 'exp', etc. If the expression is invalid, suggest a corrected version.
         If valid, return the expression unchanged.
@@ -233,7 +233,7 @@ def main():
     st.title("📊 Secant Method Solver")
     st.markdown("""
     This application solves for roots of functions using the Secant Method, with detailed step-by-step visualization
-    and AI-powered validation. The method stops when the absolute error is less than 0.5.
+    and AI-powered validation. 
     
     **Mathematical Constants:**
     - `e` or `E`: The natural logarithm base (≈ 2.71828)
